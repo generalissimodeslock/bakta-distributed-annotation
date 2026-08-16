@@ -143,7 +143,7 @@ python3 scripts/anot00_bakta_01_fleet.py \
   status --watch
 ```
 
-All workers must see the same shared queue and input/output filesystem. Each worker should use its own functional Bakta installation and preferably a local copy of the Bakta database.
+All workers must see the same shared queue and input/output filesystem. Each worker should use its own functional Bakta installation and preferably a local identical copy of the Bakta database.
 
 ## Protein prioritization
 
@@ -208,19 +208,15 @@ The workflow includes several safeguards intended to make processing traceable a
 
 ## Optional completion e-mail
 
-No personal e-mail address or password is stored in the public code. Notification settings can be provided through command-line options or environment variables:
+Notification settings can be supplied through command-line options. For portable deployments, configure recipient/sender information explicitly rather than relying on environment-specific defaults. Passwords are read from an environment variable rather than being written into the command line or repository.
 
 ```bash
-export BAKTA_EMAIL_TO="recipient@example.org"
-export BAKTA_SMTP_USER="sender@example.org"
 export BAKTA_GMAIL_APP_PASSWORD="application-password"
-```
 
-Then run a worker with:
-
-```bash
 python3 scripts/anot00_bakta_01_fleet.py work \
   --id worker-01 \
+  --email-to recipient@example.org \
+  --smtp-user sender@example.org \
   --notify-email \
   --until-empty
 ```
@@ -239,4 +235,4 @@ Official project: https://github.com/oschwengers/bakta
 
 ## License
 
-The scripts and repository-specific documentation are released under the **GNU General Public License v3.0 only (`GPL-3.0-only`)**. See [`LICENSE`](LICENSE).
+The repository-specific scripts and documentation are released under the **GNU General Public License v3.0 only (`GPL-3.0-only`)**. See [`LICENSE`](LICENSE).
