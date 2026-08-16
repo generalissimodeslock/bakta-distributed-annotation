@@ -31,10 +31,12 @@ bakta-distributed-annotation/
 ├── docs/
 │   ├── tutorial.md
 │   └── tutorial.pt-BR.md
-└── scripts/
-    ├── README.md
-    ├── anot00_bakta_01_fleet.py
-    └── anot00_bakta_02_selecionados.py
+├── scripts/
+│   ├── README.md
+│   ├── anot00_bakta_01_fleet.py
+│   └── anot00_bakta_02_selecionados.py
+└── tests/
+    └── test_smoke.py
 ```
 
 ## Requirements
@@ -205,6 +207,18 @@ The workflow includes several safeguards intended to make processing traceable a
 - atomic output writing;
 - SHA-256 fingerprints and per-sample manifests;
 - safe reruns that skip outputs only when the saved manifest and fingerprints remain valid.
+
+## Automated checks
+
+GitHub Actions runs the repository checks against Python 3.9, 3.10, 3.11, 3.12, and 3.13. The workflow verifies that both scripts compile, that their command-line help can be opened, and that the smoke tests pass.
+
+The smoke tests cover core behavior that does not require downloading the Bakta database, including genomic-FASTA recognition, sample-name sanitization, accession normalization, and representative `high`/`medium`/`low` selection rules.
+
+Run them locally with:
+
+```bash
+python3 -m unittest discover -s tests -v
+```
 
 ## Optional completion e-mail
 
