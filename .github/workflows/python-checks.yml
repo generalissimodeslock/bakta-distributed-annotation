@@ -5,7 +5,7 @@ on:
   pull_request:
 
 jobs:
-  syntax-and-cli:
+  syntax-cli-and-tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -25,3 +25,5 @@ jobs:
         run: |
           python scripts/anot00_bakta_01_fleet.py --help >/dev/null
           python scripts/anot00_bakta_02_selecionados.py --help >/dev/null
+      - name: Run smoke tests
+        run: python -m unittest discover -s tests -v
