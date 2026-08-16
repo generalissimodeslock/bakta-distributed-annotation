@@ -1,285 +1,285 @@
-# Tutorial básico de instalação e execução
+# Basic installation and execution tutorial
 
-Este tutorial apresenta os comandos essenciais para instalar o Bakta e executar os dois scripts deste repositório.
+This tutorial covers the essential commands required to install Bakta and run the two scripts in this repository.
 
-## 1. Instalar o Bakta
+## 1. Create the software environment
 
-Com Conda:
-
-```bash
-conda create -n bakta_env -c conda-forge -c bioconda bakta
-conda activate bakta_env
-```
-
-Com Mamba:
+The repository includes an `environment.yml` file. With Mamba:
 
 ```bash
-mamba create -n bakta_env -c conda-forge -c bioconda bakta
+mamba env create -f environment.yml
 mamba activate bakta_env
 ```
 
-Verifique a instalação:
+With Conda:
+
+```bash
+conda env create -f environment.yml
+conda activate bakta_env
+```
+
+Verify the installation:
 
 ```bash
 bakta --version
 bakta --help
 ```
 
-## 2. Instalar o banco de dados
+## 2. Install a Bakta database
 
-Consulte as versões disponíveis:
+List compatible database versions:
 
 ```bash
 bakta_db list
 ```
 
-Crie uma pasta para o banco:
+Create a database directory:
 
 ```bash
 mkdir -p ~/bakta_db
 ```
 
-Banco completo:
+Download the full database:
 
 ```bash
 bakta_db download --output ~/bakta_db --type full
 ```
 
-Banco reduzido:
+Or the reduced database:
 
 ```bash
 bakta_db download --output ~/bakta_db --type light
 ```
 
-O primeiro script resolve o caminho do banco nesta ordem:
+The fleet script resolves the database location in this order:
 
 ```text
 --db
 ↓
-variável BAKTA_DB
+BAKTA_DB environment variable
 ↓
-caminho padrão definido no script
+script default path
 ```
 
-Também é possível definir:
+For example:
 
 ```bash
-export BAKTA_DB=/caminho/para/bakta/db
+export BAKTA_DB=/path/to/bakta/db
 ```
 
-## 3. Consultar a ajuda dos scripts
+## 3. Inspect the command-line interfaces
 
 ```bash
 python3 scripts/anot00_bakta_01_fleet.py --help
 python3 scripts/anot00_bakta_02_selecionados.py --help
 ```
 
-## 4. Organização das amostras
+## 4. Organize the input samples
 
-Por padrão, o primeiro script espera uma raiz contendo uma subpasta por amostra. Dentro de cada amostra ele procura recursivamente:
+The fleet script expects one immediate subdirectory per sample. Within each sample directory it recursively searches for:
 
 ```text
 *_genomic.fna
 *_genomic.gbff
 ```
 
-FASTAs contendo apenas CDS ou RNA são ignorados.
+NCBI FASTA files containing only CDS or RNA sequences are excluded.
 
-Exemplo:
+Example:
 
 ```text
 etapa00_genomas_ncbi/
-├── amostra_01/
-│   ├── arquivo_genomic.fna
-│   └── arquivo_genomic.gbff
-├── amostra_02/
-└── amostra_03/
+├── sample_01/
+│   ├── assembly_genomic.fna
+│   └── assembly_genomic.gbff
+├── sample_02/
+└── sample_03/
 ```
 
-Os caminhos padrão foram definidos para o ambiente original do pipeline. Em outro computador, use `--input-root`, `--output-root` e `--db` para indicar seus próprios caminhos.
+The scripts contain default paths from the environment in which the workflow was developed. On another system, pass explicit `--input-root`, `--output-root`, and `--db` paths.
 
-## 5. Criar a fila de tarefas
-
-Usando os caminhos padrão:
-
-```bash
-python3 scripts/anot00_bakta_01_fleet.py init
-```
-
-Usando caminhos próprios:
+## 5. Initialize the shared queue
 
 ```bash
 python3 scripts/anot00_bakta_01_fleet.py \
-  --input-root /caminho/etapa00_genomas_ncbi \
-  --output-root /caminho/output00_bakta \
+  --input-root /path/to/etapa00_genomas_ncbi \
+  --output-root /path/to/output00_bakta \
   init
 ```
 
-## 6. Verificar a fila
+The queue is created under `output00_bakta/bakta_queue/` with `pending`, `running`, `done`, `failed`, and `logs` directories.
 
-```bash
-python3 scripts/anot00_bakta_01_fleet.py status
-```
+## 6. Monitor queue status
 
-Monitoramento contínuo:
-
-```bash
-python3 scripts/anot00_bakta_01_fleet.py status --watch
-```
-
-Com caminhos próprios:
+One-time status:
 
 ```bash
 python3 scripts/anot00_bakta_01_fleet.py \
-  --output-root /caminho/output00_bakta \
+  --output-root /path/to/output00_bakta \
+  status
+```
+
+Continuous monitoring:
+
+```bash
+python3 scripts/anot00_bakta_01_fleet.py \
+  --output-root /path/to/output00_bakta \
   status --watch
 ```
 
-## 7. Testar uma única amostra
+## 7. Test a single job
 
 ```bash
-python3 scripts/anot00_bakta_01_fleet.py work \
+python3 scripts/anot00_bakta_01_fleet.py \
+  --output-root /path/to/output00_bakta \
+  work \
   --id worker-01 \
   --cpus 4 \
+  --db /path/to/bakta/db \
   --once
 ```
 
-Com banco explícito:
+`--once` claims at most one job and then exits, which is useful for validating a new worker.
+
+## 8. Process the queue until completion
 
 ```bash
-python3 scripts/anot00_bakta_01_fleet.py work \
+python3 scripts/anot00_bakta_01_fleet.py \
+  --output-root /path/to/output00_bakta \
+  work \
   --id worker-01 \
   --cpus 4 \
-  --db /caminho/para/bakta/db \
-  --once
-```
-
-## 8. Processar a fila até o fim
-
-```bash
-python3 scripts/anot00_bakta_01_fleet.py work \
-  --id worker-01 \
-  --cpus 4 \
+  --db /path/to/bakta/db \
   --skip-plot \
   --until-empty
 ```
 
-Em outro computador, use outro identificador:
+Start additional workers with distinct identifiers such as `worker-02` and `worker-03`.
 
-```bash
-python3 scripts/anot00_bakta_01_fleet.py work \
-  --id worker-02 \
-  --cpus 4 \
-  --skip-plot \
-  --until-empty
-```
+All workers must see the same shared input/output filesystem and queue. Each worker must have a functional Bakta installation and access to a compatible database. For read-heavy database workloads, local identical database copies are preferable to a single network-hosted database when practical.
 
-Todos os workers devem enxergar a mesma fila compartilhada, mas cada worker deve ter acesso local a uma instalação funcional do Bakta e ao banco correspondente.
-
-## 9. Parâmetros importantes da etapa Bakta
-
-Algumas opções oferecidas pelo script são:
+## 9. Important Bakta-stage options
 
 ```text
 --cpus N
---db CAMINHO
+--db PATH
 --complete
 --compliant
 --keep-contig-headers
 --skip-plot
 --gram +|-|?
 --translation-table 11|4|25
---tmp-dir CAMINHO
+--tmp-dir PATH
 --once
 --until-empty
 ```
 
-A opção `--complete` deve ser usada somente quando todas as sequências presentes naquele FASTA forem replicons completos.
+Use `--complete` only when **all sequences in the FASTA are complete replicons**.
 
-## 10. Executar a seleção posterior
+## 10. Optional completion e-mail
 
-Depois que as anotações do Bakta estiverem concluídas:
-
-```bash
-python3 scripts/anot00_bakta_02_selecionados.py --dry-run
-```
-
-Se a conferência estiver correta:
+The public documentation recommends providing notification settings explicitly:
 
 ```bash
-python3 scripts/anot00_bakta_02_selecionados.py
+export BAKTA_EMAIL_TO="recipient@example.org"
+export BAKTA_SMTP_USER="sender@example.org"
+export BAKTA_GMAIL_APP_PASSWORD="application-password"
 ```
 
-Com caminhos próprios:
+Then run:
 
 ```bash
-python3 scripts/anot00_bakta_02_selecionados.py \
-  --bakta-root /caminho/output00_bakta \
-  --output-root /caminho/output00_bakta_selecao
+python3 scripts/anot00_bakta_01_fleet.py work \
+  --id worker-01 \
+  --notify-email \
+  --until-empty
 ```
 
-## 11. Processar apenas uma amostra
+Do not commit passwords, `.env` files, or other secrets.
 
-Em lote, por nome:
+## 11. Preview the post-Bakta selection stage
 
 ```bash
 python3 scripts/anot00_bakta_02_selecionados.py \
-  --sample amostra_01
+  --bakta-root /path/to/output00_bakta \
+  --output-root /path/to/output00_bakta_selecao \
+  --dry-run
 ```
 
-Mais de uma amostra:
+`--dry-run` validates discoverability of samples and required inputs without producing new selection outputs.
+
+## 12. Run the post-Bakta selection stage
 
 ```bash
 python3 scripts/anot00_bakta_02_selecionados.py \
-  --sample amostra_01 \
-  --sample amostra_02
+  --bakta-root /path/to/output00_bakta \
+  --output-root /path/to/output00_bakta_selecao
 ```
 
-Modo direto:
+## 13. Process a single sample
+
+Batch mode by sample name:
 
 ```bash
 python3 scripts/anot00_bakta_02_selecionados.py \
-  --bakta-dir /caminho/output00_bakta/amostra_01 \
-  --outdir /caminho/output00_bakta_selecao/amostra_01
+  --bakta-root /path/to/output00_bakta \
+  --output-root /path/to/output00_bakta_selecao \
+  --sample sample_01
 ```
 
-## 12. Política padrão de seleção
+Direct mode:
 
-Os valores padrão definidos no script são:
+```bash
+python3 scripts/anot00_bakta_02_selecionados.py \
+  --bakta-dir /path/to/output00_bakta/sample_01 \
+  --outdir /path/to/output00_bakta_selecao/sample_01
+```
+
+## 14. Default selection policy
 
 ```text
-proteína curta:           < 90 aminoácidos  → flag descritiva
-identidade fraca:         < 90%             → prioridade baixa quando aplicável
-cobertura da query fraca: < 80%             → prioridade baixa quando aplicável
-cobertura do alvo fraca:  < 80%             → prioridade baixa quando aplicável
+short protein:            < 90 aa  → descriptive audit flag
+weak identity:            < 90%    → low priority when applicable
+weak query coverage:      < 80%    → low priority when applicable
+weak subject coverage:    < 80%    → low priority when applicable
 ```
 
-Pseudogenes e sORFs são separados por padrão. Produtos hipotéticos ou não caracterizados recebem prioridade alta; produtos genéricos, de domínio, família, DUF ou UPF recebem prioridade intermediária; descrições incertas ou inferências abaixo dos limiares podem receber prioridade baixa.
+Pseudogenes and sORFs are separated by default. Missing, hypothetical, or uncharacterized products are assigned high priority; generic family/domain/DUF/UPF descriptions are assigned medium priority; uncertain wording or weak inference metrics may lead to low priority.
 
-## 13. Fluxo mínimo
+Audit flags such as short protein length or missing EC/COG/GO identifiers do not, by themselves, mean that an annotation is wrong.
+
+## 15. Main selection outputs
 
 ```text
-Genomas do NCBI
-      ↓
-anot00_bakta_01_fleet.py init
-      ↓
-fila compartilhada
-      ↓
-anot00_bakta_01_fleet.py work
-      ↓
-Bakta
-      ↓
-output00_bakta
-      ↓
-anot00_bakta_02_selecionados.py --dry-run
-      ↓
-anot00_bakta_02_selecionados.py
-      ↓
-output00_bakta_selecao
-      ↓
-proteínas priorizadas para refinamento funcional
+<sample>.targets_refined.tsv
+<sample>.selection_audit.tsv
+<sample>.priority_high.faa
+<sample>.priority_medium.faa
+<sample>.priority_low.faa
+<sample>.sorf_separate.faa
+<sample>.pseudogene_separate.faa
+<sample>.target_report.tsv
+<sample>.target_manifest.json
 ```
 
-## Observação conceitual
+## 16. Minimal workflow summary
 
-O Bakta realiza a anotação genômica. A distribuição de tarefas, a auditoria dos arquivos e a classificação das proteínas em prioridades são funções dos scripts deste repositório e não fazem parte das funções nativas do Bakta.
+```text
+NCBI genome folders
+        ↓
+queue initialization
+        ↓
+distributed Bakta execution
+        ↓
+Bakta output directories
+        ↓
+selection dry-run
+        ↓
+selection/audit
+        ↓
+priority FASTA files + audit tables + manifest
+```
+
+## Conceptual note
+
+Bakta performs genome annotation. The distributed task queue, file-integrity auditing, and downstream protein-priority classification are implemented by the scripts in this repository and are not native Bakta functions.
