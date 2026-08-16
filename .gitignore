@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+conda-env/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+*~
+
+# Runtime logs and temporary files
+*.log
+*.tmp
+*.temp
+
+# Pipeline runtime/output directories
+bakta_queue/
+output00_bakta/
+output00_bakta_selecao/
+
+# Large biological data and databases
+*.dmnd
+*.h3f
+*.h3i
+*.h3m
+*.h3p
+*.fna.gz
+*.faa.gz
+*.gbff.gz
+
+# Secrets / local environment
+.env
+*.env
+secrets/
