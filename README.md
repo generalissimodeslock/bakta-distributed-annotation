@@ -2,16 +2,16 @@
 
 Distributed bacterial genome annotation with Bakta and auditable protein prioritization for functional refinement.
 
-## Visão geral
+## Overview
 
-Este repositório contém dois componentes externos ao Bakta usados em um fluxo didático e reprodutível de anotação genômica bacteriana:
+This repository contains two components external to Bakta, used in a didactic and reproducible bacterial genome annotation workflow:
 
-1. **`anot00_bakta_01_fleet.py`** — organiza amostras, cria uma fila compartilhada coordinator–worker e executa o Bakta de forma distribuída.
-2. **`anot00_bakta_02_selecionados.py`** — lê as saídas do Bakta, verifica a consistência entre arquivos e prioriza proteínas para refinamento funcional posterior.
+1. **`anot00_bakta_01_fleet.py`** — organizes samples, creates a shared coordinator–worker queue, and runs Bakta in a distributed manner.
+2. **`anot00_bakta_02_selecionados.py`** — reads Bakta outputs, checks consistency across files, and prioritizes proteins for subsequent functional refinement.
 
-> O Bakta realiza a anotação genômica. A distribuição de tarefas, a auditoria e a classificação em prioridades são funções deste pipeline externo e não fazem parte das funções nativas do Bakta.
+> Bakta performs the genome annotation itself. Task distribution, auditing, and priority classification are functions of this external pipeline and are not native Bakta features.
 
-## Estrutura
+## Repository structure
 
 ```text
 bakta-distributed-annotation/
@@ -24,33 +24,33 @@ bakta-distributed-annotation/
     └── tutorial.md
 ```
 
-## Requisitos principais
+## Main requirements
 
 - Linux
 - Python 3
 - Bakta
-- banco de dados compatível com a versão instalada do Bakta
-- Conda ou Mamba é recomendado para instalação do ambiente
+- a database compatible with the installed Bakta version
+- Conda or Mamba is recommended for environment installation
 
-O segundo script utiliza somente a biblioteca padrão do Python e requer Python 3.9 ou superior.
+The second script uses only the Python standard library and requires Python 3.9 or later.
 
-## Uso rápido
+## Quick start
 
-Consulte primeiro a ajuda dos scripts:
+First, check the command-line help for each script:
 
 ```bash
 python3 scripts/anot00_bakta_01_fleet.py --help
 python3 scripts/anot00_bakta_02_selecionados.py --help
 ```
 
-Fluxo básico:
+Basic workflow:
 
 ```text
-Genomas do NCBI
+NCBI genomes
       ↓
 anot00_bakta_01_fleet.py init
       ↓
-fila de jobs
+job queue
       ↓
 anot00_bakta_01_fleet.py work
       ↓
@@ -60,38 +60,38 @@ output00_bakta
       ↓
 anot00_bakta_02_selecionados.py
       ↓
-proteínas priorizadas para análises posteriores
+proteins prioritized for downstream analyses
 ```
 
-O tutorial de instalação e execução está em [`docs/tutorial.md`](docs/tutorial.md).
+Installation and execution instructions are available in [`docs/tutorial.md`](docs/tutorial.md).
 
-## Entradas esperadas
+## Expected inputs
 
-O primeiro script trata cada subdiretório imediato da raiz de entrada como uma amostra e procura recursivamente:
+The first script treats each immediate subdirectory of the input root as one sample and recursively searches for:
 
 - `*_genomic.fna`
 - `*_genomic.gbff`
 
-FASTAs contendo apenas CDS ou RNA do NCBI são ignorados explicitamente.
+NCBI FASTA files containing only CDS or RNA sequences are explicitly ignored.
 
-## Saídas principais
+## Main outputs
 
-A etapa de seleção classifica CDS elegíveis em:
+The selection stage classifies eligible CDS into three priority levels:
 
 - `high`
 - `medium`
 - `low`
 
-Pseudogenes e sORFs são, por padrão, tratados separadamente. O arquivo `<amostra>.priority_high.faa` foi concebido como entrada da etapa seguinte de busca curada.
+Pseudogenes and sORFs are handled separately by default. The `<sample>.priority_high.faa` file was designed as the input contract for the next curated-search stage.
 
-## Reprodutibilidade
+## Reproducibility and auditing
 
-O fluxo inclui verificações de identidade entre JSON e FAA, hashes SHA-256, escrita atômica e manifestos por amostra para aumentar a rastreabilidade das execuções.
+The workflow includes identity checks between JSON and FAA files, SHA-256 hashes, atomic file writing, and per-sample manifests to improve traceability and reproducibility.
 
 ## Bakta
 
-Bakta é desenvolvido por Schwengers e colaboradores. Consulte o projeto oficial e cite o artigo original ao utilizar o software em trabalhos científicos.
+Bakta is developed by Schwengers and collaborators. Please consult the official Bakta project and cite the original publication when using the software in scientific work.
 
-## Licença
+## License
 
-A licença deste repositório ainda será definida. Até que um arquivo `LICENSE` seja adicionado, não se presume uma licença de reutilização para estes scripts.
+The license for this repository has not yet been defined. Until a `LICENSE` file is added, no reuse license should be assumed for these scripts.
