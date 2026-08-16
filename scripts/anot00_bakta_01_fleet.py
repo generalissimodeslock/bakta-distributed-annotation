@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: GPL-3.0-only
 """Etapa 01 do pipeline Bakta: anota genomas bacterianos obtidos do NCBI.
 
 Cada subdiretório imediato de ``etapa00_genomas_ncbi`` é tratado como uma
@@ -45,10 +46,10 @@ DEFAULT_OUTPUT_ROOT = "/home/bioinfo/anotacao_coordinator_worker/output00_bakta"
 DEFAULT_DB_PATH = "/home/bioinfo/coordinator_worker_databank/bakta/db"
 QUEUE_FOLDER_NAME = "bakta_queue"
 
-DEFAULT_EMAIL_TO = "ferntsukin@gmail.com"
+DEFAULT_EMAIL_TO = os.environ.get("BAKTA_EMAIL_TO", "")
 DEFAULT_SMTP_HOST = "smtp.gmail.com"
 DEFAULT_SMTP_PORT = 587
-DEFAULT_SMTP_USER = "ferntsukin@gmail.com"
+DEFAULT_SMTP_USER = os.environ.get("BAKTA_SMTP_USER", "")
 DEFAULT_SMTP_PASSWORD_ENV = "BAKTA_GMAIL_APP_PASSWORD"
 EMAIL_SENT_MARKER = "notification_email.sent.json"
 EMAIL_LOCK_MARKER = "notification_email.lock"
@@ -1657,6 +1658,11 @@ def main():
         ap.error("--cpus deve ser maior que zero")
     if args.cmd == "work" and args.dashboard_interval <= 0:
         ap.error("--dashboard-interval deve ser maior que zero")
+    if args.cmd == "work" and args.notify_email:
+        if not args.email_to:
+            ap.error("--notify-email exige --email-to ou a variável BAKTA_EMAIL_TO")
+        if not args.smtp_user:
+            ap.error("--notify-email exige --smtp-user ou a variável BAKTA_SMTP_USER")
 
     if args.cmd == "init":
         init_queue(args.input_root, args.output_root, overwrite=args.overwrite)

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# SPDX-License-Identifier: GPL-3.0-only
 """Etapa 02 do pipeline Bakta: seleciona alvos para reanotação funcional.
 
 O script lê o JSON e o FAA produzidos pelo Bakta, relaciona as features pelo
